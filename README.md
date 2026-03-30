@@ -1,6 +1,6 @@
 # Reachable
 
-Reachable is an event discovery app that finds things happening near you based on how long you're actually willing to travel, not just a distance in miles. Enter your location, set a maximum journey time, and Reachable pulls events from multiple sources, filters them by real travel time using Google Maps, and shows you only what you can genuinely get to.
+Reachable is an event discovery app that finds things happening near you based on how long you're actually willing to travel, not just a distance in miles. Enter your location, set a maximum journey time, and Reachable pulls events from multiple sources, filters them by real travel time using Openrouteservice, and shows you only what you can genuinely get to.
 Built as a portfolio project to practise TypeScript, React, Node.js, API integration and caching.
 
 ## Core MVP
