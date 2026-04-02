@@ -29,13 +29,14 @@ app.get('/health', (req, res) => {
 app.get('/test-ticketmaster', async (req, res) => {
   // Retrieve city name from req, for now hardcode
   const city: string = 'Swansea';
+  const country: string = 'UK';
 
   //const latitude: number = 51.6214;
   //const longitude: number = -3.9436;
 
   //const geoPoint = 'gcjjw';
 
-  const coordinates = await resolveCityToCoordinates(city);
+  const coordinates = await resolveCityToCoordinates(city, country);
   const geoPoint = toGeoHash(coordinates);
 
   const response = await fetchTicketmasterEvents(
@@ -49,8 +50,9 @@ app.get('/test-ticketmaster', async (req, res) => {
 app.get('/test-city-to-coordinates', async (req, res) => {
   // Retrieve city name from req, for now hardcode
   const city: string = 'Swansea';
+  const country: string = 'UK';
 
-  const coordinates = await resolveCityToCoordinates(city);
+  const coordinates = await resolveCityToCoordinates(city, country);
   const response = toGeoHash(coordinates);
   res.json(response);
 });
