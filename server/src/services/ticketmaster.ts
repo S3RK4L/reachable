@@ -8,7 +8,7 @@ import axios from 'axios';
 import { ReachableEvent } from '../types/event';
 
 const radiusNet = 100;
-const ticketMasterEventsURL: string =
+const ticketmasterEventsURL: string =
   'https://app.ticketmaster.com/discovery/v2/events.json?';
 
 interface TicketmasterRawEvent {
@@ -53,7 +53,7 @@ export async function fetchTicketmasterEvents(
   startDateTime: string,
   endDateTime: string,
 ): Promise<ReachableEvent[]> {
-  const queryString = `${ticketMasterEventsURL}radius=${radiusNet}&geoPoint=${geoPoint}&startDateTime=${startDateTime}&endDateTime=${endDateTime}&size=5&sort=distance,asc&apikey=${process.env.TICKETMASTER_API_KEY}`;
+  const queryString = `${ticketmasterEventsURL}radius=${radiusNet}&geoPoint=${geoPoint}&startDateTime=${startDateTime}&endDateTime=${endDateTime}&size=5&sort=distance,asc&apikey=${process.env.TICKETMASTER_API_KEY}`;
   const response = await axios.get<TicketmasterResponse>(queryString);
 
   if (!response.data._embedded) {
@@ -62,9 +62,9 @@ export async function fetchTicketmasterEvents(
     );
   }
 
-  const ticketMasterEvents: ReachableEvent[] = [];
+  const ticketmasterEvents: ReachableEvent[] = [];
   for (const event of response.data._embedded.events) {
-    ticketMasterEvents.push({
+    ticketmasterEvents.push({
       id: event.id,
       name: event.name,
       date: event.dates.start.localDate,
@@ -84,7 +84,7 @@ export async function fetchTicketmasterEvents(
     });
   }
 
-  return ticketMasterEvents;
+  return ticketmasterEvents;
 }
 
 // TODO: Use redis for caching
