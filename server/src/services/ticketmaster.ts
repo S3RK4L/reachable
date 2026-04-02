@@ -2,21 +2,7 @@
 // Call Ticketmaster API with location and date range parameters
 // Normalise the response to fit with our ReachableEvent object shape
 // Return the normalised events (Redis caching comes later)
-
-// Example using API
-// https://app.ticketmaster.com/discovery/v2/events.json?countryCode=UK&apiKey=<api_key>
-
-// For location:latlong (because user entering location will be converted to coordinates
-// to be passed to ticket master), and radius (generous to cast a wide net)
-// For date range: startDateTime, endDateTime,
-
-// We'd want to make use of their size, page, and sort parameters too, so we get the most applicable
-// events to the search retrieved on page 1
-
 // Ticket master will return a list of events, including lat long to feed into open route service
-
-// Function to retrieve ticket master events using parameters
-// Note: once we get this working, lets use geoPoint instead of lat and long, since they are too be depracted
 
 import axios from 'axios';
 import { ReachableEvent } from '../types/event';
@@ -61,6 +47,7 @@ interface TicketmasterResponse {
     size: number;
   };
 }
+
 export async function fetchTicketmasterEvents(
   geoPoint: string,
   startDateTime: string,
@@ -75,7 +62,7 @@ export async function fetchTicketmasterEvents(
     );
   }
 
-  let ticketMasterEvents: ReachableEvent[] = [];
+  const ticketMasterEvents: ReachableEvent[] = [];
   for (const event of response.data._embedded.events) {
     ticketMasterEvents.push({
       id: event.id,
