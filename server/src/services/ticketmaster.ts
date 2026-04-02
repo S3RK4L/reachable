@@ -21,9 +21,8 @@
 import axios from 'axios';
 import { ReachableEvent } from '../types/event';
 
-const source = 'ticketmaster';
 const radiusNet = 100;
-const ticketMasterEventsURL =
+const ticketMasterEventsURL: string =
   'https://app.ticketmaster.com/discovery/v2/events.json?';
 
 interface TicketmasterRawEvent {
@@ -67,32 +66,35 @@ export async function fetchTicketmasterEvents(
   startDateTime: string,
   endDateTime: string,
 ): Promise<ReachableEvent[]> {
-  const queryString = `${ticketMasterEventsURL}&radius=${radiusNet}&geoPoint=${geoPoint}&startDateTime=${startDateTime}&endDateTime=${endDateTime}&size=5&sort=distance,asc&apikey=${process.env.TICKETMASTER_API_KEY}`;
-  console.log('Query: ' + queryString);
+  const queryString = `${ticketMasterEventsURL}radius=${radiusNet}&geoPoint=${geoPoint}&startDateTime=${startDateTime}&endDateTime=${endDateTime}&size=5&sort=distance,asc&apikey=${process.env.TICKETMASTER_API_KEY}`;
   const response = await axios.get<TicketmasterResponse>(queryString);
 
+  if (!response.data._embedded) {
+    throw new Error(
+      `No events found for Geo Point: ${geoPoint} within date range ${startDateTime} - ${endDateTime}`,
+    );
+  }
+
   let ticketMasterEvents: ReachableEvent[] = [];
-  if (response.data._embedded) {
-    for (const event of response.data._embedded.events) {
-      ticketMasterEvents.push({
-        id: event.id,
-        name: event.name,
-        date: event.dates.start.localDate,
-        venue: {
-          name: event._embedded.venues[0].name,
-          address:
-            event._embedded.venues[0].address.line1 +
-            ' ' +
-            event._embedded.venues[0].postalCode +
-            ' ' +
-            event._embedded.venues[0].city.name,
-          lat: parseFloat(event._embedded.venues[0].location.latitude),
-          lng: parseFloat(event._embedded.venues[0].location.longitude),
-        },
-        url: event.url,
-        source: 'ticketmaster',
-      });
-    }
+  for (const event of response.data._embedded.events) {
+    ticketMasterEvents.push({
+      id: event.id,
+      name: event.name,
+      date: event.dates.start.localDate,
+      venue: {
+        name: event._embedded.venues[0].name,
+        address:
+          event._embedded.venues[0].address.line1 +
+          ' ' +
+          event._embedded.venues[0].postalCode +
+          ' ' +
+          event._embedded.venues[0].city.name,
+        lat: parseFloat(event._embedded.venues[0].location.latitude),
+        lng: parseFloat(event._embedded.venues[0].location.longitude),
+      },
+      url: event.url,
+      source: 'ticketmaster',
+    });
   }
 
   return ticketMasterEvents;

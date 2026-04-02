@@ -11,21 +11,20 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@types/ngeohash": "^0.6.8",
     "axios": "^1.14.0",
     "dotenv": "^17.3.1",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "ngeohash": "^0.6.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",
-    "@types/axios": "^0.9.36",
-    "@types/dotenv": "^6.1.1",
     "@types/express": "^5.0.6",
     "@types/node": "^25.5.0",
     "@typescript-eslint/eslint-plugin": "^8.58.0",
     "@typescript-eslint/parser": "^8.58.0",
     "eslint": "^9.39.4",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-react": "^7.37.5",
     "globals": "^17.4.0",
     "nodemon": "^3.1.14",
     "prettier": "^3.8.1",
