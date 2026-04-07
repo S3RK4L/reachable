@@ -1,8 +1,5 @@
-// GOAL:
-// Call Ticketmaster API with location and date range parameters
-// Normalise the response to fit with our ReachableEvent object shape
-// Return the normalised events (Redis caching comes later)
-// Ticket master will return a list of events, including lat long to feed into open route service
+// Fetches events from the Ticketmaster Discovery API and
+// normalises them into ReachableEvent format
 
 import axios from 'axios';
 import { ReachableEvent } from '../types/event';

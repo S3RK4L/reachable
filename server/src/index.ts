@@ -6,7 +6,12 @@ import dotenv from 'dotenv';
 
 // importing our own functions
 import { fetchTicketmasterEvents } from './services/ticketmaster';
-import { resolveCityToCoordinates, toGeoHash } from './services/geocoding';
+import {
+  resolveCityToCoordinates,
+  resolvePostcodeToCoordinates,
+  toGeoHash,
+} from './services/geocoding';
+import { getOriginToEventTravelTime } from './services/ors';
 
 // dotenv loads our .env file so process.env variables are available throughout the app
 dotenv.config();
@@ -28,13 +33,8 @@ app.get('/health', (req, res) => {
 
 app.get('/test-ticketmaster', async (req, res) => {
   // Retrieve city name from req, for now hardcode
-  const city: string = 'Swansea';
+  const city: string = 'London';
   const country: string = 'UK';
-
-  //const latitude: number = 51.6214;
-  //const longitude: number = -3.9436;
-
-  //const geoPoint = 'gcjjw';
 
   const coordinates = await resolveCityToCoordinates(city, country);
   const geoPoint = toGeoHash(coordinates);
@@ -49,12 +49,44 @@ app.get('/test-ticketmaster', async (req, res) => {
 
 app.get('/test-city-to-coordinates', async (req, res) => {
   // Retrieve city name from req, for now hardcode
-  const city: string = 'Swansea';
+  const city: string = 'London';
   const country: string = 'UK';
 
   const coordinates = await resolveCityToCoordinates(city, country);
   const response = toGeoHash(coordinates);
   res.json(response);
+});
+
+app.get('/test-postcode-to-coordinates', async (req, res) => {
+  // Retrieve postcode from req, for now hardcode
+  const postcode: string = 'EC1A 1BB';
+
+  const coordinates = await resolvePostcodeToCoordinates(postcode);
+  const response = toGeoHash(coordinates);
+  res.json(response);
+});
+
+app.get('/test-ors-matrix', async (req, res) => {
+  // Retrieve postcode from req, for now hardcode
+  const postcode: string = 'EC1A 1BB';
+
+  const originCoordinates = await resolvePostcodeToCoordinates(postcode);
+  const geoPoint = toGeoHash(originCoordinates);
+  const events = await fetchTicketmasterEvents(
+    geoPoint,
+    '2026-04-02T00:00:00Z',
+    '2026-04-04T23:59:00Z',
+  );
+
+  // Takes origin coordinates and event coordinates to find travel time
+  const travelTimeMinutes = await getOriginToEventTravelTime(
+    originCoordinates.lat,
+    originCoordinates.lng,
+    events[0].venue.lat,
+    events[0].venue.lng,
+  );
+
+  res.json(travelTimeMinutes);
 });
 
 // starts the server and tells it to listen for incoming requests on our port
