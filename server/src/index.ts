@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 
 // importing our own functions
 import { fetchTicketmasterEvents } from './services/ticketmaster';
+import { fetchSkiddleEvents } from './services/skiddle';
 import {
   resolveCityToCoordinates,
   resolvePostcodeToCoordinates,
@@ -41,6 +42,23 @@ app.get('/test-ticketmaster', async (req, res) => {
 
   const response = await fetchTicketmasterEvents(
     geoPoint,
+    '2026-04-02T00:00:00Z',
+    '2026-04-04T23:59:00Z',
+  );
+  res.json(response);
+});
+
+app.get('/test-skiddle', async (req, res) => {
+  // Retrieve city name from req, for now hardcode
+  const city: string = 'London';
+  const country: string = 'UK';
+
+  const coordinates = await resolveCityToCoordinates(city, country);
+  const geoPoint = toGeoHash(coordinates);
+
+  const response = await fetchSkiddleEvents(
+    coordinates.lat,
+    coordinates.lng,
     '2026-04-02T00:00:00Z',
     '2026-04-04T23:59:00Z',
   );
