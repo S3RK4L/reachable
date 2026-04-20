@@ -9,7 +9,7 @@ const skiddleEventsURL: string =
   'https://www.skiddle.com/api/v1/events/search/?';
 
 interface SkiddleRawEvent {
-  id: string;
+  id: number;
   eventname: string;
   date: string; // YYYY-MM-DD
   link: string;
@@ -17,6 +17,8 @@ interface SkiddleRawEvent {
     id: string;
     name: string;
     town: string;
+    address: string;
+    postcode: string;
     postcode_lookup: string;
     latitude: number;
     longitude: number;
@@ -34,7 +36,7 @@ export async function fetchSkiddleEvents(
   endDateTime: string,
 ): Promise<ReachableEvent[]> {
   const queryString = `${skiddleEventsURL}radius=${radiusNet}&latitude=${lat}&longitude=${lng}&minDate=${startDateTime.split('T')[0]}&maxDate=${endDateTime.split('T')[0]}&limit=5&order=distance&api_key=${process.env.SKIDDLE_API_KEY}`;
-  const response = await axios.get(queryString);
+  const response = await axios.get<SkiddleResponse>(queryString);
 
   if (!response.data.results) {
     throw new Error(
@@ -46,7 +48,7 @@ export async function fetchSkiddleEvents(
   for (const event of response.data.results) {
     console.log('Response venue: ', JSON.stringify(event.venue));
     skiddleEvents.push({
-      id: event.id,
+      id: String(event.id),
       name: event.eventname,
       date: event.date,
       venue: {
@@ -57,8 +59,8 @@ export async function fetchSkiddleEvents(
           event.venue.postcode +
           ' ' +
           event.venue.town,
-        lat: parseFloat(event.venue.latitude),
-        lng: parseFloat(event.venue.longitude),
+        lat: event.venue.latitude,
+        lng: event.venue.longitude,
       },
       url: event.link,
       source: 'skiddle',
