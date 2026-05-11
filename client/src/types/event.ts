@@ -11,6 +11,4 @@ export interface ReachableEvent {
   url: string;
   source: 'ticketmaster' | 'skiddle';
   travelTimeMinutes?: number;
-  walkTimeMinutes?: number;
-  driveTimeMinutes?: number;
 }

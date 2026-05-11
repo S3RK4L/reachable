@@ -1,53 +1,42 @@
-// Calculates travel time between two points
-// using the OpenRouteService directions API
+// Calculates travel times from one origin to multiple destinations
+// using the OpenRouteService matrix API
 
 import axios from 'axios';
 
-const orsURL: string =
-  'https://api.openrouteservice.org/v2/directions/driving-car';
+const orsURL: string = 'https://api.openrouteservice.org/v2/matrix/driving-car';
 
-interface ORSResponse {
-  summary: {
-    duration: number; // seconds
-    distance: number; // metres
-  };
+interface ORSMatrixResponse {
+  durations: (number | null)[][];
 }
 
 interface TravelTime {
   minutes: number;
 }
 
-export async function getOriginToEventTravelTime(
+export async function getTravelTimes(
   originLat: number,
   originLng: number,
-  destinationLat: number,
-  destinationLng: number,
-): Promise<TravelTime> {
-  // Note: ORS API takes longitude then latitude
-  const data = {
-    coordinates: [
-      [originLng, originLat],
-      [destinationLng, destinationLat],
-    ],
-  };
+  destinations: { lat: number; lng: number }[],
+): Promise<(TravelTime | null)[]> {
+  // ORS API takes [longitude, latitude]
+  const locations = [
+    [originLng, originLat],
+    ...destinations.map((d) => [d.lng, d.lat]),
+  ];
 
-  const config = {
-    headers: {
-      Authorization: `Bearer ${process.env.OPENROUTESERVICE_API_KEY}`,
-    },
-  };
-
-  const response = await axios.post<{ routes: ORSResponse[] }>(
+  const response = await axios.post<ORSMatrixResponse>(
     orsURL,
-    data,
-    config,
+    { locations, sources: [0], metrics: ['duration'] },
+    {
+      headers: {
+        Authorization: `Bearer ${process.env.OPENROUTESERVICE_API_KEY}`,
+      },
+    },
   );
 
-  if (response.data.routes.length === 0) {
-    throw new Error(`Unable to find travel time `);
-  }
-
-  return {
-    minutes: Math.floor(response.data.routes[0].summary.duration / 60),
-  };
+  // skip index 0 (origin to itself)
+  return response.data.durations[0].slice(1).map((seconds) => {
+    if (seconds === null) return null;
+    return { minutes: Math.floor(seconds / 60) };
+  });
 }

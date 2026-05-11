@@ -8,16 +8,21 @@ interface SearchFilters {
 interface SearchFormProps {
   filters: SearchFilters;
   onChange: (filters: SearchFilters) => void;
+  onSubmit: () => void;
+  loading: boolean;
 }
 
-export default function SearchForm({ filters, onChange }: SearchFormProps) {
+export default function SearchForm({ filters, onChange, onSubmit, loading }: SearchFormProps) {
   const update = (partial: Partial<SearchFilters>) => {
     onChange({ ...filters, ...partial });
   };
 
   return (
     <form
-      onSubmit={(e) => e.preventDefault()}
+      onSubmit={(e) => {
+        e.preventDefault();
+        onSubmit();
+      }}
       className="bg-surface rounded-2xl border border-slate-200 shadow-sm p-5 md:p-6 space-y-5"
     >
       {/* Row 1: location + dates */}
@@ -88,6 +93,14 @@ export default function SearchForm({ filters, onChange }: SearchFormProps) {
           </div>
         </div>
       </div>
+
+      <button
+        type="submit"
+        disabled={loading}
+        className="w-full rounded-xl bg-ocean text-surface font-extrabold uppercase tracking-wider text-sm py-3 hover:bg-ocean-light transition disabled:opacity-50 disabled:cursor-not-allowed"
+      >
+        {loading ? 'Searching...' : 'Find events'}
+      </button>
     </form>
   );
 }

@@ -3,7 +3,8 @@ import Header from './components/Header';
 import Hero from './components/Hero';
 import SearchForm from './components/SearchForm';
 import EventList from './components/EventList';
-import { dummyEvents } from './data/dummyEvents';
+import { fetchEvents } from './lib/api';
+import type { ReachableEvent } from './types/event';
 
 interface SearchFilters {
   location: string;
@@ -20,28 +21,71 @@ function App() {
     maxTravelTime: 60,
   });
 
+  const [events, setEvents] = useState<ReachableEvent[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [hasSearched, setHasSearched] = useState(false);
+
+  const handleSearch = async () => {
+    if (!filters.location || !filters.startDate || !filters.endDate) {
+      setError('Please fill in location and both dates.');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    setHasSearched(true);
+
+    try {
+      const results = await fetchEvents(
+        filters.location,
+        filters.startDate,
+        filters.endDate,
+      );
+      setEvents(results);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong.');
+      setEvents([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const filteredEvents = useMemo(() => {
-    return dummyEvents
+    return events
       .filter((event) => {
-        const walkTime = event.walkTimeMinutes ?? event.travelTimeMinutes;
-        if (walkTime != null && walkTime > filters.maxTravelTime) {
+        if (
+          event.travelTimeMinutes != null &&
+          event.travelTimeMinutes > filters.maxTravelTime
+        ) {
           return false;
         }
         return true;
       })
       .sort((a, b) => {
-        const aTime = a.walkTimeMinutes ?? a.travelTimeMinutes ?? Infinity;
-        const bTime = b.walkTimeMinutes ?? b.travelTimeMinutes ?? Infinity;
+        const aTime = a.travelTimeMinutes ?? Infinity;
+        const bTime = b.travelTimeMinutes ?? Infinity;
         return aTime - bTime;
       });
-  }, [filters.maxTravelTime]);
+  }, [events, filters.maxTravelTime]);
 
   return (
     <div className="min-h-screen bg-page">
       <Header />
       <Hero />
       <main className="max-w-5xl mx-auto px-4 sm:px-6 pb-16 space-y-8">
-        <SearchForm filters={filters} onChange={setFilters} />
+        <SearchForm
+          filters={filters}
+          onChange={setFilters}
+          onSubmit={handleSearch}
+          loading={loading}
+        />
+
+        {error && (
+          <div className="bg-pop/10 text-pop border border-pop/30 rounded-xl px-4 py-3 text-sm font-semibold">
+            {error}
+          </div>
+        )}
 
         <div className="flex items-baseline justify-between px-1">
           <div className="flex items-center gap-3">
