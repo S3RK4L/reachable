@@ -15,6 +15,7 @@ import {
 } from './services/geocoding';
 import { getTravelTimes } from './services/ors';
 import { ReachableEvent } from './types/event';
+import { Coordinates } from './types/coordinates';
 
 // dotenv loads our .env file so process.env variables are available throughout the app
 dotenv.config();
@@ -122,9 +123,17 @@ app.get('/events', async (req, res) => {
     }
   }
 
-  // TODO: dedupe events that appear in both sources (venue + date + name)
+  const seen = new Map<string, ReachableEvent>();
+  for (const event of events) {
+    const key = `${toGeoHash(event.venue, 7)}|${event.date}`;
+    const existing = seen.get(key);
+    if (!existing || existing.source === 'ticketmaster') {
+      seen.set(key, event);
+    }
+  }
+  const dedupedEvents = [...seen.values()];
 
-  const destinations = events.map((e) => ({
+  const destinations = dedupedEvents.map((e) => ({
     lat: e.venue.lat,
     lng: e.venue.lng,
   }));
@@ -135,10 +144,12 @@ app.get('/events', async (req, res) => {
     destinations,
   );
 
-  const eventsWithTravelTimes: ReachableEvent[] = events.map((event, i) => ({
-    ...event,
-    travelTimeMinutes: travelTimes[i]?.minutes,
-  }));
+  const eventsWithTravelTimes: ReachableEvent[] = dedupedEvents.map(
+    (event, i) => ({
+      ...event,
+      travelTimeMinutes: travelTimes[i]?.minutes,
+    }),
+  );
 
   res.json(eventsWithTravelTimes);
 });

@@ -8,10 +8,11 @@ Built as a portfolio project to practise TypeScript, React, Node.js, API integra
 - User enters a location manually (no geolocation yet, keep it simple)
 - User selects a maximum travel time (e.g. 30 mins, 1 hour, 90 mins, 2 hours)
 - Backend fetches events from Ticketmaster and Skiddle in parallel
-- Google Maps Distance Matrix filters out events the user can't reach in time
+- Openrouteservice matrix API calculates real driving times from the user's location to every event venue
+- Frontend filters out events the user can't reach in time
 - Results are normalised into a consistent format regardless of source
 - Basic event cards displayed on the frontend showing name, date, venue, travel time and source
-- Redis caching on backend to avoid hammering external APIs
+- Redis caching on backend to avoid hammering external APIs (planned)
 
 ## Out of scope for MVP (post-MVP)
 
@@ -24,16 +25,27 @@ Built as a portfolio project to practise TypeScript, React, Node.js, API integra
 
 ## Tech Stack
 
-- TypeScript
-- Node.js
-- MongoDB
+- **Frontend:** React 19, TypeScript, Vite, Tailwind CSS v4
+- **Backend:** Node.js, TypeScript, Express 5, Axios
+- **Routing:** Openrouteservice (matrix API for driving times)
+- **Geocoding:** Nominatim (city → coords), Postcodes.io (UK postcode → coords), ngeohash
+- **Event sources:** Ticketmaster Discovery API, Skiddle API
+- **Caching (planned):** Redis
 
 ## Running Locally
 
+Monorepo with `client/` and `server/` packages. The server reads API keys from `server/.env` — `TICKETMASTER_API_KEY`, `SKIDDLE_API_KEY`, `OPENROUTESERVICE_API_KEY`.
+
 ```bash
+# Backend (port 3001)
+cd server
 npm install
-npx tsc
-node dist/index.js
+npm run dev
+
+# Frontend (port 5173)
+cd client
+npm install
+npm run dev
 ```
 
 ---

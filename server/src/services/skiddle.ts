@@ -46,7 +46,6 @@ export async function fetchSkiddleEvents(
 
   const skiddleEvents: ReachableEvent[] = [];
   for (const event of response.data.results) {
-    console.log('Response venue: ', JSON.stringify(event.venue));
     skiddleEvents.push({
       id: String(event.id),
       name: event.eventname,

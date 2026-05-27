@@ -60,6 +60,9 @@ export async function resolvePostcodeToCoordinates(
   };
 }
 
-export function toGeoHash(coordinates: Coordinates): string {
-  return geohash.encode(coordinates.lat, coordinates.lng);
+export function toGeoHash(
+  coordinates: Coordinates,
+  precision: number = 9,
+): string {
+  return geohash.encode(coordinates.lat, coordinates.lng, precision);
 }
